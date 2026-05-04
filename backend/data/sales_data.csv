@@ -1,0 +1,51 @@
+order_id,product_id,product_name,category,supplier_id,supplier_name,region,quantity,unit_price,discount,order_date,delivery_date,status,customer_id,warehouse_id
+ORD-1001,PRD-201,Wireless Headphones,Electronics,SUP-01,TechSource Ltd,North,10,49.99,0.05,2024-01-03,2024-01-10,Delivered,CUST-501,WH-01
+ORD-1002,PRD-202,Office Chair,Furniture,SUP-02,FurniPro,East,5,199.99,,2024-01-05,2024-01-15,Delivered,CUST-502,WH-02
+ORD-1003,PRD-203,Laptop Stand,Electronics,SUP-01,TechSource Ltd,South,N/A,29.99,0.1,2024-01-07,,Pending,CUST-503,WH-03
+ORD-1004,PRD-204,Ergonomic Keyboard,Electronics,SUP-03,InputGear,West,8,89.99,0.0,2024-01-08,2024-01-18,Delivered,CUST-504,WH-01
+ORD-1005,PRD-205,Desk Lamp,Home,SUP-04,BrightSupply,North,20,24.99,0.15,2024-01-10,2024-01-20,Shipped,CUST-505,WH-02
+ORD-1006,PRD-206,Monitor 27",Electronics,SUP-01,TechSource Ltd,East,3,349.99,0.05,2024-01-12,,In Transit,CUST-506,WH-03
+ORD-1007,PRD-207,Standing Desk,Furniture,SUP-02,FurniPro,South,-2,499.99,0.1,2024-01-14,2024-01-28,Delivered,CUST-507,WH-01
+ORD-1008,PRD-208,USB-C Hub,Electronics,SUP-03,InputGear,West,15,39.99,,2024-01-15,2024-01-22,Delivered,CUST-508,WH-02
+ORD-1009,PRD-209,Webcam HD,Electronics,SUP-01,TechSource Ltd,North,7,79.99,0.0,2024-01-18,2024-01-25,Delivered,CUST-509,WH-03
+ORD-1010,PRD-210,Noise-Cancel Earbuds,Electronics,SUP-05,SoundWave,East,12,129.99,0.2,2024-01-20,2024-02-01,Shipped,CUST-510,WH-01
+ORD-1011,PRD-211,Filing Cabinet,Furniture,SUP-02,FurniPro,South,4,149.99,,2024-01-22,2024-02-05,Delivered,CUST-511,WH-02
+ORD-1012,PRD-212,Mechanical Keyboard,Electronics,SUP-03,InputGear,West,N/A,119.99,0.05,2024-01-23,,Pending,CUST-512,WH-03
+ORD-1013,PRD-213,Portable SSD 1TB,Electronics,SUP-01,TechSource Ltd,North,9,89.99,0.0,2024-01-25,2024-02-02,Delivered,CUST-513,WH-01
+ORD-1014,PRD-214,Whiteboard,Office,SUP-06,OfficeMate,East,6,59.99,0.1,2024-01-27,2024-02-08,Delivered,CUST-514,WH-02
+ORD-1015,PRD-215,Cable Management Kit,Electronics,SUP-03,InputGear,South,25,14.99,,2024-01-29,2024-02-06,Shipped,CUST-515,WH-03
+ORD-1016,PRD-216,Smart Thermostat,Home,SUP-07,HomeTech,West,5,249.99,0.05,2024-02-01,2024-02-12,Delivered,CUST-516,WH-01
+ORD-1017,PRD-217,Printer Ink Set,Office,SUP-06,OfficeMate,North,30,34.99,0.0,2024-02-03,,In Transit,CUST-517,WH-02
+ORD-1018,PRD-218,4K Webcam,Electronics,SUP-01,TechSource Ltd,East,-1,159.99,0.1,2024-02-05,2024-02-15,Delivered,CUST-518,WH-03
+ORD-1019,PRD-219,Surge Protector,Electronics,SUP-03,InputGear,South,18,49.99,,2024-02-07,2024-02-14,Delivered,CUST-519,WH-01
+ORD-1020,PRD-220,Bookshelf,Furniture,SUP-02,FurniPro,West,3,179.99,0.15,2024-02-10,2024-02-24,Shipped,CUST-520,WH-02
+ORD-1021,PRD-201,Wireless Headphones,Electronics,SUP-01,TechSource Ltd,North,N/A,49.99,0.05,2024-02-12,,Pending,CUST-521,WH-03
+ORD-1022,PRD-203,Laptop Stand,Electronics,SUP-01,TechSource Ltd,East,11,29.99,0.0,2024-02-14,2024-02-21,Delivered,CUST-522,WH-01
+ORD-1023,PRD-221,Desk Organizer,Office,SUP-06,OfficeMate,South,22,19.99,,2024-02-16,2024-02-23,Delivered,CUST-523,WH-02
+ORD-1024,PRD-222,Laptop Bag,Accessories,SUP-08,CarryAll,West,14,59.99,0.1,2024-02-18,2024-02-28,Delivered,CUST-524,WH-03
+ORD-1025,PRD-223,Wireless Mouse,Electronics,SUP-03,InputGear,North,20,34.99,,2024-02-20,2024-02-27,Shipped,CUST-525,WH-01
+ORD-1026,PRD-224,Monitor Arm,Electronics,SUP-01,TechSource Ltd,East,6,79.99,0.05,2024-02-22,2024-03-04,Delivered,CUST-526,WH-02
+ORD-1027,PRD-225,Conference Mic,Electronics,SUP-05,SoundWave,South,8,99.99,0.0,2024-02-24,,Pending,CUST-527,WH-03
+ORD-1028,PRD-226,Laptop Cooler,Electronics,SUP-03,InputGear,West,10,39.99,0.1,2024-02-26,2024-03-05,Delivered,CUST-528,WH-01
+ORD-1029,PRD-227,Ergonomic Mouse,Electronics,SUP-03,InputGear,North,-3,54.99,,2024-02-28,2024-03-07,Delivered,CUST-529,WH-02
+ORD-1030,PRD-228,Air Purifier,Home,SUP-07,HomeTech,East,4,199.99,0.1,2024-03-01,2024-03-14,Shipped,CUST-530,WH-03
+ORD-1031,PRD-229,Desk Fan,Home,SUP-07,HomeTech,South,15,44.99,,2024-03-03,2024-03-10,Delivered,CUST-531,WH-01
+ORD-1032,PRD-230,Label Maker,Office,SUP-06,OfficeMate,West,N/A,39.99,0.05,2024-03-05,,Pending,CUST-532,WH-02
+ORD-1033,PRD-231,Projector,Electronics,SUP-01,TechSource Ltd,North,2,699.99,0.15,2024-03-07,2024-03-21,Delivered,CUST-533,WH-03
+ORD-1034,PRD-232,Router WiFi 6,Electronics,SUP-01,TechSource Ltd,East,7,149.99,,2024-03-09,2024-03-18,Delivered,CUST-534,WH-01
+ORD-1035,PRD-233,External DVD Drive,Electronics,SUP-03,InputGear,South,12,49.99,0.0,2024-03-11,2024-03-18,Shipped,CUST-535,WH-02
+ORD-1036,PRD-234,Power Bank 20000mAh,Electronics,SUP-05,SoundWave,West,16,59.99,0.1,2024-03-13,2024-03-20,Delivered,CUST-536,WH-03
+ORD-1037,PRD-235,Desk Mat,Accessories,SUP-08,CarryAll,North,25,24.99,,2024-03-15,2024-03-22,Delivered,CUST-537,WH-01
+ORD-1038,PRD-236,Smart Plug,Home,SUP-07,HomeTech,East,-5,19.99,0.05,2024-03-17,2024-03-24,Delivered,CUST-538,WH-02
+ORD-1039,PRD-237,HDMI Cable 2m,Electronics,SUP-03,InputGear,South,30,12.99,0.0,2024-03-19,2024-03-26,Shipped,CUST-539,WH-03
+ORD-1040,PRD-238,Locker Cabinet,Furniture,SUP-02,FurniPro,West,N/A,299.99,0.2,2024-03-21,,Pending,CUST-540,WH-01
+ORD-1041,PRD-239,Bluetooth Speaker,Electronics,SUP-05,SoundWave,North,10,89.99,,2024-03-23,2024-04-02,Delivered,CUST-541,WH-02
+ORD-1042,PRD-240,Humidifier,Home,SUP-07,HomeTech,East,8,64.99,0.1,2024-03-25,2024-04-05,Delivered,CUST-542,WH-03
+ORD-1043,PRD-241,Cable Tester,Electronics,SUP-03,InputGear,South,5,34.99,0.0,2024-03-27,2024-04-03,Shipped,CUST-543,WH-01
+ORD-1044,PRD-242,Keyboard Tray,Furniture,SUP-02,FurniPro,West,7,79.99,,2024-03-29,2024-04-10,Delivered,CUST-544,WH-02
+ORD-1045,PRD-243,Laptop Riser,Accessories,SUP-08,CarryAll,North,13,44.99,0.05,2024-04-01,2024-04-08,Delivered,CUST-545,WH-03
+ORD-1046,PRD-244,Mouse Pad XL,Accessories,SUP-08,CarryAll,East,20,19.99,0.0,2024-04-03,2024-04-10,Shipped,CUST-546,WH-01
+ORD-1047,PRD-245,Smart Strip,Home,SUP-07,HomeTech,South,-4,34.99,,2024-04-05,2024-04-12,Delivered,CUST-547,WH-02
+ORD-1048,PRD-246,Pen Holder,Office,SUP-06,OfficeMate,West,N/A,9.99,0.1,2024-04-07,,Pending,CUST-548,WH-03
+ORD-1049,PRD-247,Dual Monitor Stand,Electronics,SUP-01,TechSource Ltd,North,4,129.99,0.05,2024-04-09,2024-04-19,Delivered,CUST-549,WH-01
+ORD-1050,PRD-248,Shredder,Office,SUP-06,OfficeMate,East,3,109.99,,2024-04-11,2024-04-22,Delivered,CUST-550,WH-02
