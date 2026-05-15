@@ -108,6 +108,8 @@ class BaselineForecaster:
         if alpha is None:
             alpha = self.alpha
         
+        # Ensure alpha is a valid float to avoid division issues
+        alpha = float(alpha) if alpha is not None else 0.3
         es = ts.ewm(span=1/alpha, adjust=False).mean()
         logger.info(f"Calculated exponential smoothing with alpha={alpha}")
         return es
@@ -165,7 +167,7 @@ class BaselineForecaster:
         """
         # Prepare data for linear regression
         X = np.arange(len(ts)).reshape(-1, 1)
-        y = ts.values
+        y = np.asarray(ts.values, dtype=float)
         
         # Fit linear model
         model = LinearRegression()
@@ -365,15 +367,16 @@ class BaselineForecaster:
         
         # Calculate metrics for each method
         metrics = {}
-        test_values = test_ts.values
+        test_values = np.asarray(test_ts.values, dtype=float)
         
         for method_name, forecast_values in forecasts.items():
-            mae = mean_absolute_error(test_values, forecast_values[:len(test_values)])
-            rmse = np.sqrt(mean_squared_error(test_values, forecast_values[:len(test_values)]))
+            forecast_vals = forecast_values[:len(test_values)]
+            mae = mean_absolute_error(test_values, forecast_vals)
+            rmse = np.sqrt(mean_squared_error(test_values, forecast_vals))
             
             # R² score (handle edge cases)
             try:
-                r2 = r2_score(test_values, forecast_values[:len(test_values)])
+                r2 = r2_score(test_values, forecast_vals)
             except:
                 r2 = np.nan
             
@@ -381,11 +384,64 @@ class BaselineForecaster:
                 'mae': float(mae),
                 'rmse': float(rmse),
                 'r2': float(r2) if not np.isnan(r2) else None,
-                'mape': float(np.mean(np.abs((test_values - forecast_values[:len(test_values)]) / (test_values + 1e-8)))) * 100
+                'mape': float(np.mean(np.abs((test_values - forecast_vals) / (test_values + 1e-8)))) * 100
             }
         
         logger.info(f"Model evaluation complete. Metrics: {metrics}")
         return metrics
+    
+    def save_model(self, filepath: str) -> None:
+        """
+        Save trained model to disk using joblib.
+        
+        Args:
+            filepath: Path to save model (.joblib or .pkl)
+        """
+        import joblib
+        
+        if self.model is None:
+            raise ValueError("No trained model to save. Call fit() first.")
+        
+        model_data = {
+            'model': self.model,
+            'scaler_mean': self.scaler_mean,
+            'scaler_std': self.scaler_std,
+            'window_size': self.window_size,
+            'alpha': self.alpha
+        }
+        
+        joblib.dump(model_data, filepath)
+        logger.info(f"BaselineForecaster model saved to {filepath}")
+    
+    def load_model(self, filepath: str) -> None:
+        """
+        Load trained model from disk.
+        
+        Args:
+            filepath: Path to load model from
+        """
+        import joblib
+        
+        model_data = joblib.load(filepath)
+        
+        self.model = model_data['model']
+        self.scaler_mean = model_data['scaler_mean']
+        self.scaler_std = model_data['scaler_std']
+        self.window_size = model_data['window_size']
+        self.alpha = model_data['alpha']
+        
+        logger.info(f"BaselineForecaster model loaded from {filepath}")
+    
+    def get_model_info(self) -> Dict:
+        """Get model information and configuration."""
+        return {
+            'model_type': 'BaselineForecaster',
+            'window_size': self.window_size,
+            'alpha': self.alpha,
+            'is_trained': self.model is not None,
+            'scaler_mean': self.scaler_mean,
+            'scaler_std': self.scaler_std
+        }
 
 
 def create_forecast_summary(df: pd.DataFrame,

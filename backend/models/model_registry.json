@@ -1,0 +1,8 @@
+{
+  "baseline/test_model_v1": {
+    "type": "baseline",
+    "path": "C:\\Users\\Accounts\\Desktop\\april 1 batch(kt)\\swaroop\\swaroop new backend\\ai-supply-chain-backend-2-\\backend\\models\\baseline\\test_model_v1\\test_model_v1_model.joblib",
+    "metadata_path": "C:\\Users\\Accounts\\Desktop\\april 1 batch(kt)\\swaroop\\swaroop new backend\\ai-supply-chain-backend-2-\\backend\\models\\baseline\\test_model_v1\\metadata.json",
+    "saved_at": "2026-05-15T14:34:31.967349"
+  }
+}
