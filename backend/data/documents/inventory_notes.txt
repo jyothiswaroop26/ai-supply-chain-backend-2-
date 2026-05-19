@@ -1,0 +1,7 @@
+Inventory Notes
+===============
+Date: 2026-05-19
+
+- Added initial supplier document set.
+- This file can be replaced with real extracted text from PDFs.
+- Keep one document per source for easier traceability.
