@@ -1,0 +1,12 @@
+Shipment Summary
+================
+Date: 2026-05-19
+
+Region: South
+Delayed shipments: 3
+On-time shipments: 27
+Average delay (hours): 4.5
+
+Notes:
+- Port congestion impacted two routes.
+- One route delayed due to customs hold.
