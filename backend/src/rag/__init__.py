@@ -11,10 +11,15 @@ from .loader import (
     load_all_documents,
     load_document
 )
+from .vector_store import FAISSVectorStore
+from .retriever import SemanticRetriever, semantic_search
 
 __all__ = [
     'Document',
     'DocumentLoader',
     'load_all_documents',
-    'load_document'
+    'load_document',
+    'FAISSVectorStore',
+    'SemanticRetriever',
+    'semantic_search'
 ]
