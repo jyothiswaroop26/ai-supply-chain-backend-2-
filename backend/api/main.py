@@ -47,7 +47,12 @@ def _get_or_create_rag_pipeline():
     if pipeline is not None:
         return pipeline
 
-    pipeline = create_rag_pipeline(llm_provider_type="local")
+    # Default to TF-IDF embeddings to avoid heavy model downloads on first request.
+    embedding_model = os.getenv("RAG_EMBEDDING_MODEL", "tfidf")
+    pipeline = create_rag_pipeline(
+        llm_provider_type="local",
+        embedding_model=embedding_model,
+    )
     pipeline.load_documents(_get_documents_dir())
     app_state["rag_pipeline"] = pipeline
     return pipeline
@@ -95,17 +100,6 @@ async def health_check():
         "version": "1.0.0"
     }
 
-# API status endpoint
-@app.get("/api/status", tags=["Status"])
-async def api_status():
-    """
-    API status endpoint
-    """
-    return {
-        "message": "API is running",
-        "initialized": app_state.get('initialized', False)
-    }
-
 # Root endpoint
 @app.get("/", tags=["Root"])
 async def root():
@@ -113,6 +107,7 @@ async def root():
     Root endpoint providing API information
     """
     return {
+        "message": "AI Supply Chain Backend API",
         "service": "AI Supply Chain Backend API",
         "version": "1.0.0",
         "endpoints": {
@@ -138,6 +133,9 @@ async def ask_question(payload: AskRequest):
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except (ImportError, ModuleNotFoundError, FileNotFoundError) as exc:
+        logger.warning("RAG resources unavailable for /ask request: %s", str(exc))
+        raise HTTPException(status_code=404, detail="RAG resources are unavailable") from exc
     except Exception as exc:
         logger.error("Failed to process /ask request: %s", str(exc), exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process query") from exc
@@ -160,6 +158,8 @@ async def global_exception_handler(request, exc):
 # Include routers
 from api.routes import router as api_router
 app.include_router(api_router, prefix="/api")
+# Backward-compatible, unprefixed routes used by existing tests and clients.
+app.include_router(api_router)
 
 # RAG Pipeline routes (example - uncomment when RAG pipeline is ready)
 # from src.rag.rag_pipeline import create_rag_pipeline
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     
     logger.info(f"Starting server at {host}:{port}")
     uvicorn.run(
-        "main:app",
+        "api.main:app",
         host=host,
         port=port,
         reload=reload,
