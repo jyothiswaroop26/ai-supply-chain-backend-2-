@@ -6,12 +6,15 @@ import os
 import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+import pandas as pd
 from src.rag.rag_pipeline import create_rag_pipeline
+from src.forecasting.model import BaselineForecaster
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +37,29 @@ class AskRequest(BaseModel):
     num_retrieval: int = Field(default=5, ge=1, le=20)
     max_tokens: int = Field(default=256, ge=50, le=2000)
     temperature: float = Field(default=0.7, ge=0.0, le=1.0)
+
+
+class ForecastRequest(BaseModel):
+    """Request payload for the forecast endpoint."""
+
+    periods: int = Field(default=7, ge=1, le=365, description="Number of periods to forecast ahead")
+    freq: str = Field(default="D", pattern="^(D|W|M)$", description="Frequency: D=daily, W=weekly, M=monthly")
+    methods: Optional[List[str]] = Field(
+        default=None,
+        description="Forecast methods to use: 'sma', 'es', 'trend'. Defaults to all."
+    )
+    date_col: str = Field(default="order_date", description="Date column in the dataset")
+    value_col: str = Field(default="quantity", description="Value column to forecast")
+
+
+def _get_sales_data() -> pd.DataFrame:
+    """Load sales data CSV relative to the backend folder."""
+    csv_path = Path(__file__).resolve().parent.parent / "data" / "sales_data.csv"
+    df = pd.read_csv(csv_path)
+    # Coerce non-numeric quantity values to NaN then drop them
+    df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce")
+    df = df.dropna(subset=["quantity"])
+    return df
 
 
 def _get_documents_dir() -> str:
@@ -140,6 +166,38 @@ async def ask_question(payload: AskRequest):
         logger.error("Failed to process /ask request: %s", str(exc), exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process query") from exc
 
+@app.post("/forecast", tags=["Forecasting"])
+async def forecast(payload: ForecastRequest):
+    """Generate demand forecasts from historical sales data using the baseline forecaster."""
+    try:
+        df = _get_sales_data()
+        forecaster = BaselineForecaster()
+        result = forecaster.predict(
+            df,
+            periods=payload.periods,
+            date_col=payload.date_col,
+            value_col=payload.value_col,
+            freq=payload.freq,
+            methods=payload.methods,
+        )
+        # Convert numpy arrays to plain lists for JSON serialisation
+        serialisable = {method: values.tolist() for method, values in result.items()}
+        return {
+            "periods": payload.periods,
+            "freq": payload.freq,
+            "value_col": payload.value_col,
+            "forecasts": serialisable,
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        logger.error("Sales data file not found: %s", str(exc))
+        raise HTTPException(status_code=404, detail="Sales data not found") from exc
+    except Exception as exc:
+        logger.error("Failed to process /forecast request: %s", str(exc), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to generate forecast") from exc
+
+
 # Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
@@ -160,29 +218,6 @@ from api.routes import router as api_router
 app.include_router(api_router, prefix="/api")
 # Backward-compatible, unprefixed routes used by existing tests and clients.
 app.include_router(api_router)
-
-# RAG Pipeline routes (example - uncomment when RAG pipeline is ready)
-# from src.rag.rag_pipeline import create_rag_pipeline
-# @app.post("/api/rag/query", tags=["RAG"])
-# async def rag_query(query: str, num_retrieval: int = 5):
-#     """Query the RAG pipeline"""
-#     try:
-#         pipeline = create_rag_pipeline()
-#         result = pipeline.query(query, num_retrieval=num_retrieval)
-#         return result
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-# Forecasting endpoints (example - ready for implementation)
-# @app.post("/api/forecast", tags=["Forecasting"])
-# async def create_forecast(data: dict):
-#     """Create a sales forecast using the model"""
-#     pass
-
-# @app.get("/api/forecast/{forecast_id}", tags=["Forecasting"])
-# async def get_forecast(forecast_id: str):
-#     """Retrieve a forecast result"""
-#     pass
 
 if __name__ == "__main__":
     import uvicorn

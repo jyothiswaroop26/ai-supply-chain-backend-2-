@@ -63,15 +63,14 @@ class BaselineForecaster:
         Returns:
             Time series as pandas Series with DatetimeIndex
         """
-        df_copy = df.copy()
-        df_copy[date_col] = pd.to_datetime(df_copy[date_col])
-        
-        # Aggregate by date
-        ts = df_copy.groupby(date_col)[value_col].sum()
-        
-        # Resample to specified frequency and forward-fill missing dates
+        # Only convert the date column; avoid copying the entire dataframe
+        dates = pd.to_datetime(df[date_col])
+        ts = df[value_col].groupby(dates).sum()
+        ts.index.name = date_col
+
+        # Resample to specified frequency and fill missing periods with 0
         ts = ts.asfreq(freq, fill_value=0)
-        
+
         logger.info(f"Prepared time series: {len(ts)} periods, freq={freq}")
         return ts
     
@@ -243,12 +242,17 @@ class BaselineForecaster:
         Returns:
             Dictionary containing forecasts from different methods
         """
+        valid_methods = {'sma', 'es', 'trend'}
         if methods is None:
             methods = ['sma', 'es', 'trend']
-        
-        # Prepare time series
+        else:
+            unknown = set(methods) - valid_methods
+            if unknown:
+                raise ValueError(f"Unknown forecast method(s): {unknown}. Valid: {valid_methods}")
+
+        # Prepare time series once for all requested methods
         ts = self.prepare_timeseries_data(df, date_col, value_col, freq)
-        
+
         # Generate forecasts
         forecasts = {}
         
@@ -287,18 +291,17 @@ class BaselineForecaster:
             Dictionary with forecasts for each category
         """
         category_forecasts = {}
-        
-        for category in df[category_col].unique():
-            category_df = df[df[category_col] == category]
-            forecasts = self.predict(
+
+        # groupby is faster than repeated boolean-mask filtering
+        for category, category_df in df.groupby(category_col, sort=False):
+            category_forecasts[category] = self.predict(
                 category_df,
                 periods=periods,
                 date_col=date_col,
-                value_col=value_col
+                value_col=value_col,
             )
-            category_forecasts[category] = forecasts
             logger.info(f"Generated forecasts for category: {category}")
-        
+
         return category_forecasts
     
     def forecast_revenue(self, 
@@ -350,20 +353,21 @@ class BaselineForecaster:
             Dictionary with evaluation metrics
         """
         ts = self.prepare_timeseries_data(df, date_col, value_col, freq)
-        
+
         # Split data
         split_idx = int(len(ts) * train_test_split)
         train_ts = ts.iloc[:split_idx]
         test_ts = ts.iloc[split_idx:]
-        
-        # Generate forecasts for test period
-        forecasts = self.predict(
-            df.iloc[:int(len(df) * train_test_split)],
-            periods=len(test_ts),
-            date_col=date_col,
-            value_col=value_col,
-            freq=freq
-        )
+
+        # Generate forecasts directly from the already-prepared train series
+        # to avoid a second prepare_timeseries_data call inside predict().
+        forecasts = {}
+        if len(train_ts) > 0:
+            forecasts['sma'] = self.forecast_sma(train_ts, len(test_ts))
+            forecasts['exponential_smoothing'] = self.forecast_exponential_smoothing(train_ts, len(test_ts))
+            forecasts['trend'] = self.forecast_trend(train_ts, len(test_ts))
+            if len(forecasts) > 1:
+                forecasts['ensemble'] = np.mean(list(forecasts.values()), axis=0)
         
         # Calculate metrics for each method
         metrics = {}
