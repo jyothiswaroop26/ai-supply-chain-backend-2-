@@ -322,6 +322,56 @@ class TestAPIBehaviour:
 
 
 # ---------------------------------------------------------------------------
+# Namespaced router endpoints (/api/*)
+# ---------------------------------------------------------------------------
+
+class TestNamespacedRouterEndpoints:
+    def test_api_forecast_endpoint_exists(self, client):
+        payload = {
+            "historical_data": [100, 120, 130],
+            "periods_ahead": 3,
+            "model_type": "random_forest",
+        }
+        response = client.post("/api/forecast", json=payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("status") == "success"
+        assert "forecast" in data
+
+    def test_api_forecast_by_id_endpoint_exists(self, client):
+        response = client.get("/api/forecast/sample-id")
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("forecast_id") == "sample-id"
+        assert data.get("status") == "completed"
+
+    def test_api_rag_query_endpoint_exists(self, client):
+        response = client.post(
+            "/api/rag/query",
+            params={
+                "query": "What is inventory status?",
+                "num_retrieval": 3,
+                "max_tokens": 100,
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("query") == "What is inventory status?"
+        assert "answer" in data
+
+    def test_api_rag_batch_query_endpoint_exists(self, client):
+        response = client.post(
+            "/api/rag/batch-query",
+            params={"num_retrieval": 2},
+            json=["inventory", "shipping"],
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "results" in data
+        assert len(data["results"]) == 2
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
