@@ -1,17 +1,15 @@
 """
 Data preprocessing utilities for sales data cleaning.
 """
-import os
 import logging
+from pathlib import Path
+
 import pandas as pd
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
 # Default path relative to this file's location
-DEFAULT_DATA_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "..", "data", "sales_data.csv"
-)
+DEFAULT_DATA_PATH = str(Path(__file__).resolve().parents[2] / "data" / "sales_data.csv")
 
 NUMERIC_COLUMNS = ["quantity", "unit_price", "discount"]
 DATE_COLUMNS = ["order_date", "delivery_date"]
@@ -25,8 +23,8 @@ REQUIRED_COLUMNS = [
 
 def load_data(filepath: str = DEFAULT_DATA_PATH) -> pd.DataFrame:
     """Load sales CSV data into a DataFrame."""
-    filepath = os.path.normpath(filepath)
-    if not os.path.exists(filepath):
+    filepath = str(Path(filepath).resolve())
+    if not Path(filepath).exists():
         raise FileNotFoundError(f"Data file not found: {filepath}")
     df = pd.read_csv(filepath)
     logger.info("Loaded %d rows from %s", len(df), filepath)
@@ -50,9 +48,7 @@ def clean_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
     - Removes rows with negative quantity or unit_price.
     """
     df = df.copy()
-
-    for col in NUMERIC_COLUMNS:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df[NUMERIC_COLUMNS] = df[NUMERIC_COLUMNS].apply(pd.to_numeric, errors="coerce")
 
     # Discount is optional; default to 0 when absent
     df["discount"] = df["discount"].fillna(0.0)
@@ -67,7 +63,7 @@ def clean_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
     invalid_mask = (df["quantity"] < 0) | (df["unit_price"] < 0)
     if invalid_mask.any():
         logger.warning("Dropped %d rows with negative quantity/unit_price", invalid_mask.sum())
-        df = df[~invalid_mask]
+        df = df.loc[~invalid_mask]
 
     df["quantity"] = df["quantity"].astype(int)
     return df
@@ -76,8 +72,7 @@ def clean_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
 def clean_date_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Parse date columns; keep NaT for missing delivery dates (in-transit orders)."""
     df = df.copy()
-    for col in DATE_COLUMNS:
-        df[col] = pd.to_datetime(df[col], errors="coerce")
+    df[DATE_COLUMNS] = df[DATE_COLUMNS].apply(pd.to_datetime, errors="coerce")
     return df
 
 
@@ -85,8 +80,8 @@ def clean_string_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Strip whitespace from all object (string) columns."""
     df = df.copy()
     str_cols = df.select_dtypes(include="object").columns
-    for col in str_cols:
-        df[col] = df[col].str.strip()
+    if len(str_cols) > 0:
+        df[str_cols] = df[str_cols].apply(lambda s: s.str.strip())
     return df
 
 
@@ -133,10 +128,31 @@ def preprocess(filepath: str = DEFAULT_DATA_PATH) -> pd.DataFrame:
     """
     df = load_data(filepath)
     validate_columns(df)
+    # Keep one working copy to avoid repeated full DataFrame copies between steps.
+    df = df.copy()
     df = remove_duplicates(df)
-    df = clean_string_columns(df)
-    df = clean_numeric_columns(df)
-    df = clean_date_columns(df)
+
+    str_cols = df.select_dtypes(include="object").columns
+    if len(str_cols) > 0:
+        df[str_cols] = df[str_cols].apply(lambda s: s.str.strip())
+
+    df[NUMERIC_COLUMNS] = df[NUMERIC_COLUMNS].apply(pd.to_numeric, errors="coerce")
+    df["discount"] = df["discount"].fillna(0.0)
+
+    before = len(df)
+    df = df.dropna(subset=["quantity", "unit_price"])
+    dropped = before - len(df)
+    if dropped:
+        logger.warning("Dropped %d rows with unparseable quantity/unit_price", dropped)
+
+    invalid_mask = (df["quantity"] < 0) | (df["unit_price"] < 0)
+    if invalid_mask.any():
+        logger.warning("Dropped %d rows with negative quantity/unit_price", invalid_mask.sum())
+        df = df.loc[~invalid_mask]
+
+    df["quantity"] = df["quantity"].astype(int)
+
+    df[DATE_COLUMNS] = df[DATE_COLUMNS].apply(pd.to_datetime, errors="coerce")
     df = add_derived_columns(df)
     logger.info("Preprocessing complete. Final shape: %s", df.shape)
     return df
